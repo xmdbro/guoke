@@ -6,6 +6,8 @@ if(NOT WIN32)
     message(FATAL_ERROR "guoke supports Windows only.")
 endif()
 
+enable_language(RC)
+
 option(GUOKE_BUILD_EXAMPLES "Build the demo application and DLL" ON)
 
 function(guoke_configure_target target)
@@ -18,14 +20,26 @@ function(guoke_configure_target target)
     )
 
     if(MSVC)
-        target_compile_options(${target} PRIVATE /W4 /permissive-)
+        target_compile_options(${target} PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:/W4;/permissive->")
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic)
+        target_compile_options(${target} PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Wpedantic>")
     endif()
 endfunction()
 
-add_executable(guoke src/main.cpp)
+add_executable(guoke WIN32
+    src/main.cpp
+    src/ui/main_window.cpp
+    src/resources/guoke.rc
+)
 guoke_configure_target(guoke)
+target_compile_definitions(guoke PRIVATE _WIN32_WINNT=0x0A00)
+target_include_directories(guoke PRIVATE src/resources)
+target_link_libraries(guoke PRIVATE user32 gdi32 comdlg32)
+
+if(MSVC)
+    # The resource file embeds the complete manifest for both toolchains.
+    target_link_options(guoke PRIVATE /MANIFEST:NO)
+endif()
 
 if(GUOKE_BUILD_EXAMPLES)
     add_subdirectory(examples)

@@ -21,7 +21,7 @@ No CMake presets or third-party dependencies are required.
 
 ## Next..
 
-- minimal native Windows interface.
+~~- minimal native Windows interface.~~
 - process selection and DLL compatibility checks.
 - demo application and sample DLL for testing.
 - one user-mode loading method with clear results.
